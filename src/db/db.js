@@ -8,6 +8,7 @@ try{
     
 }catch(err){
 console.log(`${err}|XXX| DB Connection Is Failed |XXX|`);
+process.exit(0)
 
 }
 }
