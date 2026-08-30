@@ -31,7 +31,7 @@ default:"user"
 })
 
 
-const userModel = mongoose.model("SpotifyUser", userSchema);
+const userModel = mongoose.model("user", userSchema);
 
 
 export default userModel;

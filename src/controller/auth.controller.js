@@ -124,5 +124,15 @@ user:{
 
 }
 
+const logOutUser = async(req, res) =>{
 
-export default {registerUser, loginUser}
+res.clearCookie("token")
+res.status(200).json({
+message:"User Logout Successfully"
+
+
+})
+}
+
+
+export default {registerUser, loginUser,logOutUser}
