@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
+import blacklistTokenModel from "../models/blacklistToken.model.js";
 
-const authArtist = (req, res, next) => {
+const authArtist = async (req, res, next) => {
   const token = req.cookies.token;
-  
+
   if (!token) {
     return res.status(401).json({
       message: "Unauthorized"
@@ -10,15 +11,23 @@ const authArtist = (req, res, next) => {
   }
 
   try {
+    const isBlacklisted = await blacklistTokenModel.findOne({ token });
+
+    if (isBlacklisted) {
+      return res.status(401).json({
+        message: "Token has been revoked, please login again"
+      });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     if (decoded.role !== "artist") {
       return res.status(403).json({
         message: "You don't have access"
       });
     }
 
-    req.user = decoded; 
+    req.user = decoded;
     next();
   } catch (err) {
     console.log(err);
@@ -30,9 +39,9 @@ const authArtist = (req, res, next) => {
 
 
 
-const authUser = (req, res, next) => {
+const authUser = async (req, res, next) => {
   const token = req.cookies.token;
-  
+
   if (!token) {
     return res.status(401).json({
       message: "Unauthorized"
@@ -40,15 +49,23 @@ const authUser = (req, res, next) => {
   }
 
   try {
+    const isBlacklisted = await blacklistTokenModel.findOne({ token });
+
+    if (isBlacklisted) {
+      return res.status(401).json({
+        message: "Token has been revoked, please login again"
+      });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     if (decoded.role !== "user") {
       return res.status(403).json({
         message: "You don't have access"
       });
     }
 
-    req.user = decoded; 
+    req.user = decoded;
     next();
   } catch (err) {
     console.log(err);
@@ -60,7 +77,4 @@ const authUser = (req, res, next) => {
 
 
 
-
-
-
-export default { authArtist, authUser };
+export default { authArtist, authUser};

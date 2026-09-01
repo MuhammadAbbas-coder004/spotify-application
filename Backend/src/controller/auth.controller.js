@@ -2,6 +2,7 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import cookie from "cookie-parser";
 import bcrypt from "bcryptjs";
+import blacklistTokenModel from "../models/blacklistToken.model.js"
 
 
 
@@ -36,9 +37,9 @@ const registerUser = async (req, res) => {
     const token = jwt.sign({
         id: user._id,
         role: user
-    }, process.env.JWT_SECRET);
+    }, process.env.JWT_SECRET, { expiresIn: "1d" });
 
-    res.cookie("token", token);
+    res.cookie("token", token, { maxAge: 24 * 60 * 60 * 1000 });
 
     res.status(201).json({
         message: "User Rigesterd Successfully",
@@ -99,9 +100,9 @@ id:user._id,
 
 role:user.role
 
-},process.env.JWT_SECRET)
+},process.env.JWT_SECRET, { expiresIn: "1d" })
 
-res.cookie("token", token)
+res.cookie("token", token, { maxAge: 24 * 60 * 60 * 1000 })
 
 
 res.status(200).json({
@@ -124,15 +125,19 @@ user:{
 
 }
 
-const logOutUser = async(req, res) =>{
 
-res.clearCookie("token")
-res.status(200).json({
-message:"User Logout Successfully"
+const logOutUser = async (req, res) => {
+  const token = req.cookies.token;
 
+  if (token) {
+    await blacklistTokenModel.create({ token });
+  }
 
-})
-}
+  res.clearCookie("token");
+  res.status(200).json({
+    message: "User Logout Successfully"
+  });
+};
 
 
 export default {registerUser, loginUser,logOutUser}
